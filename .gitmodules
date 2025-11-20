@@ -1,0 +1,6 @@
+[submodule "submodules/Depth-Anything-V2"]
+	path = submodules/Depth-Anything-V2
+	url = https://github.com/DepthAnything/Depth-Anything-V2.git
+[submodule "submodules/owl-wms"]
+	path = submodules/owl-wms
+	url = https://github.com/lapp0/owl-wms.git

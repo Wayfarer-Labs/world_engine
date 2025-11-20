@@ -1,0 +1,10 @@
+# Core stack
+torch==2.9.1
+torchvision
+torchaudio
+xformers
+
+# Reuse upstream requirements
+-r submodules/Depth-Anything-V2/requirements.txt
+-r submodules/owl-wms/requirements.txt
+-r submodules/owl-wms/owl-vaes/requirements.txt

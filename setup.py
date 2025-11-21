@@ -62,6 +62,7 @@ setup(
         "depth_anything_v2.dinov2_layers",
         "depth_anything_v2.util",
         "owl_vaes",
+        "owl_vaes.models",
         "owl_wms",
         "owl_wms.models",
         "owl_wms.nn",

@@ -22,7 +22,7 @@ export HF_TOKEN=<your access token>
 from world_engine import WorldEngine, CtrlInput
 
 # Create inference engine
-engine = WorldEngine("OpenWorldLabs/CoD-Img-Base", device=device)
+engine = WorldEngine("OpenWorldLabs/CoD-Img-Base", device="cuda")
 
 # Specify a prompt
 engine.set_prompt("A fun game")
@@ -39,22 +39,22 @@ for controller_input in [
 ## Scope
 
 ### What this package is
-A library which abstracts away model implementation details inference optimizations
-- Encapsulates handling of DiT, autoencoder, and text encoder
-- Library consumer specifies model URI and handles controller inputs, text prompts, and images
+A library that takes care of model and inference plumbing
+- Manages the whole frame-generation pipeline, including the DiT, autoencoder, text encoder, and KV cache
+- Lets you specify in a model via its URI and pass in controller inputs, text prompts, and images directly
 
 In scope:
 - Optimized implementations for Nvidia, AMD, Apple Silicon, etc
-- Consumer and data center hardware
+- Support for both consumer and data center GPUs
 - Loading base World Models and LoRA adapters
-- Performing all steps necessary to create a frame image conditioned on history, controls, and a text string
+- Generating frame images conditioned on prior frames, control inputs, and text prompts
 
 ### What this package isn't
 This isn't a fully featured client, it's a core library.
 
 Out of scope:
-- Rendering / displaying video and images
-- Reading controllers or keyboard inputs
-- FAL integration, other integrations
+- Rendering or displaying video and images
+- Reading controller, keyboard, or mouse input from devices
+- FAL, and other integrations
 
 Anything out of scope can be added to `examples/`, which isn't part of the `world_engine.*` package.

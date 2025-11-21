@@ -2,9 +2,7 @@
 
 # 🌐 OverWorld Inference Engine
 
-<p align="center">
   Inference Engine for World Models
-</p>
 </div>
 
 
@@ -41,18 +39,17 @@ for controller_input in [
 ## Scope
 
 ### What this package is
-A tool which does one thing and does it well
+A library which abstracts away model implementation details inference optimizations
+- Encapsulates handling of DiT, autoencoder, and text encoder
+- Library consumer specifies model URI and handles controller inputs, text prompts, and images
 
 In scope:
-- An abstraction away from the WM:
-  - No knowledge of DiT, autoencoder, or text encoder needed
-  - user specifies model URI and handles controller inputs, text prompts, and images
 - Optimized implementations for Nvidia, AMD, Apple Silicon, etc
 - Consumer and data center hardware
 - Loading base World Models and LoRA adapters
 
 ### What this package isn't
-This isn't a full featured client, it's a core library.
+This isn't a fully featured client, it's a core library.
 
 Out of scope:
 - Rendering video

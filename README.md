@@ -40,8 +40,8 @@ for controller_input in [
 
 ### What this package is
 A library that takes care of model and inference plumbing
-- Manages the whole frame-generation pipeline, including the DiT, autoencoder, text encoder, and KV cache
-- Lets you specify in a model via its URI and pass in controller inputs, text prompts, and images directly
+- Encapsulates the frame-generation pipeline, including the DiT, autoencoder, text encoder, and KV cache
+- Provides you a simple interface to specify a model and perform generation steps conditioned on controller inputs, text prompts, and images
 
 In scope:
 - Optimized implementations for Nvidia, AMD, Apple Silicon, etc

@@ -27,6 +27,29 @@ def parse_requirements(path: str):
             if line.startswith("-r "):
                 included = line.split(maxsplit=1)[1]
                 _parse(file_path.parent / included)
+                continue
+
+            # Normalize git-based requirements to valid PEP 508
+            if "git+" in line:
+                s = line
+                # drop editable flag if present
+                if s.startswith("-e "):
+                    s = s[3:].strip()
+
+                url = s
+                name = None
+
+                if "#egg=" in s:
+                    url, egg = s.split("#egg=", 1)
+                    url = url.strip()
+                    name = egg.strip()
+                else:
+                    url = s.split()[0]
+                    name = url.rsplit("/", 1)[-1]
+                    if name.endswith(".git"):
+                        name = name[:-4]
+
+                requirements.append(f"{name} @ {url}")
             else:
                 requirements.append(line)
 

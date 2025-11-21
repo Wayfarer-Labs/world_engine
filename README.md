@@ -3,7 +3,7 @@
 ### Setup
 ```
 # Install
-pip install git+https://github.com/Wayfarer-Labs/world_engine
+pip install "world_engine@git+https://github.com/Wayfarer-Labs/world_engine.git"
 
 # Specify HuggingFace Token (https://huggingface.co/settings/tokens)
 export HF_TOKEN=<your access token>
@@ -49,4 +49,4 @@ Out of scope:
 - Reading controllers / keyboard inputs
 - FAL integration, other integrations
 
-Anything out of scope can be added to `examples/`, which isn't importable or part of the `world_model` package.
+Anything out of scope can be added to `examples/`, which isn't part of the `world_engine.*` package.

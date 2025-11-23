@@ -3,16 +3,18 @@ from typing import AsyncIterable, AsyncIterator
 import asyncio
 import contextlib
 import cv2
+import sys
 import torch
 
 from world_engine import WorldEngine, CtrlInput
 
 
-async def render(frames: AsyncIterable[torch.Tensor]) -> None:
+async def render(frames: AsyncIterable[torch.Tensor], win_name="OverWorLd (ESC to exit)") -> None:
     """Render stream of RGB tensor images."""
+    cv2.namedWindow(win_name, cv2.WINDOW_AUTOSIZE | cv2.WINDOW_GUI_NORMAL)
     async for t in frames:
-        cv2.imshow("OverWorLd", t.cpu().numpy())
-        await asyncio.sleep(0)  # let the event loop breathe
+        cv2.imshow(win_name, t.cpu().numpy())
+        await asyncio.sleep(0)
     cv2.destroyAllWindows()
 
 
@@ -20,7 +22,6 @@ async def frame_stream(engine: WorldEngine, ctrls: AsyncIterable[CtrlInput]) -> 
     """Generate frame by calling Engine for each ctrl."""
     yield await asyncio.to_thread(engine.gen_frame)
     async for ctrl in ctrls:
-        print("ctrls:", ctrl)
         yield await asyncio.to_thread(engine.gen_frame, ctrl=ctrl)
 
 
@@ -52,7 +53,8 @@ async def ctrl_stream(delay: int = 1) -> AsyncIterator[CtrlInput]:
 
 
 async def main() -> None:
-    engine = WorldEngine("OpenWorldLabs/CoD-Img-Base", device="cuda")
+    uri = sys.argv[1] if len(sys.argv) > 1 else "OpenWorldLabs/CoD-Img-Base"
+    engine = WorldEngine(uri, device="cuda")
     ctrls = ctrl_stream()
     frames = frame_stream(engine, ctrls)
     await render(frames)

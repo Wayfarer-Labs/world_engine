@@ -134,40 +134,6 @@ class WorldEngine:
         self.uncached_buffer = state
 
 
-# AFTER MVP
+# TODO
 # - Apply noise_prev
 # - RoPE for inference
-
-
-def test_world_engine(device="cuda"):
-    import time
-    model_uri = "OpenWorldLabs/CoD-BiV2-Base"
-    uint8_img = torch.randint(
-        0, 256, (512, 512, 3),
-        dtype=torch.uint8, device=device
-    )  # random sample img
-
-    engine = WorldEngine(model_uri, device=device)
-
-    # frame idx = 0
-    # -------------
-
-    # persistent prompt (until new prompt is set)
-    engine.set_prompt("A fun game")
-
-    # record_frame: Add a clean frame to sequence. No denoising. Advance state
-    first_ctrl = CtrlInput()
-    img = engine.append_frame(uint8_img, ctrl=first_ctrl)
-
-    # frame idxs = 1+
-    # ---------------
-    for controller_input in [
-            CtrlInput(button={48, 42}, mouse=[0.4, 0.3]),
-            CtrlInput(mouse=[0.1, 0.2]),
-            CtrlInput(button={95, 32, 105}),
-    ]:
-        start = time.time()
-        img = engine.gen_frame(ctrl=controller_input)  # Generate image, advance to next frame
-        print("Step time:", time.time() - start)
-
-    engine.reset()  # Clean up, prepare for new generation

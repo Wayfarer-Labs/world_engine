@@ -2,6 +2,7 @@ from typing import Dict, List, Optional, Set, Tuple
 from torch import Tensor
 from dataclasses import dataclass, field
 
+import gc
 import torch
 
 from owl_wms.models.world import WorldModel
@@ -69,8 +70,13 @@ class WorldEngine:
         self.reset()
 
     @torch.inference_mode()
-    def reset(self):
+    def reset(self, collect_garbage: bool = True):
         """Reset state for new generation"""
+        if collect_garbage:
+            del self.kv_cache, self.uncached_buffer
+            gc.collect()
+            torch.cuda.empty_cache()
+
         cfg, dev, dt = self.model_cfg, self.device, self.dtype
         self.uncached_buffer = {
             "x": torch.empty(1, 0, cfg.channels, cfg.height, cfg.width, device=dev, dtype=dt),
@@ -82,6 +88,7 @@ class WorldEngine:
             cfg, max_seq_len=512, batch_size=1, dtype=dt, n_uncached_frames=self.uncached_k
         ).to(dev)
         self.frame_idx = 0
+
 
     @torch.inference_mode()
     def _push_frame_state(self, x, ctrl=None):

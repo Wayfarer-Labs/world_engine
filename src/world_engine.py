@@ -6,7 +6,7 @@ import gc
 import torch
 
 from owl_wms.models.world import WorldModel
-from owl_wms.nn.kv_cache import StaticKVCache
+# from owl_wms.nn.kv_cache import StaticKVCache
 
 from world_engine.ae import InferenceAE
 
@@ -31,6 +31,91 @@ class InferenceConfig:
 @dataclass
 class OptimizationConfig:
     pass  # TODO
+
+
+####
+# REMOVE
+import torch.nn as nn
+
+
+class LayerKVCache(nn.Module):
+    def __init__(self, B, H, L, Dh, dtype, tokens_per_frame: int, n_uncached_tok: int):
+        super().__init__()
+        self.tpf = tokens_per_frame
+        self.n_uncached_tok = n_uncached_tok
+
+        # Per-layer KV buffers
+        self.k = nn.Buffer(torch.empty(B, H, L, Dh, dtype=dtype), persistent=False)
+        self.v = nn.Buffer(torch.empty(B, H, L, Dh, dtype=dtype), persistent=False)
+        self.kv_offset = nn.Buffer(torch.zeros((), dtype=torch.long), persistent=False)
+
+        # Per-layer t_pos buffers
+        self.t_pos = nn.Buffer(torch.zeros(B, L, dtype=torch.long), persistent=False)
+        self.t_pos_offset = nn.Buffer(torch.zeros((), dtype=torch.long), persistent=False)
+
+    def upsert(self, k: Tensor, v: Tensor, t_pos: Tensor):
+        # --- KV upsert ---
+        T = k.size(2)
+        torch._assert(T % self.tpf == 0, "KV insert must be frame-aligned")
+
+        kv_start = self.kv_offset
+        kv_end = kv_start + T
+        torch._assert(kv_end <= self.k.size(2), "KV cache overflow")
+
+        self.k[:, :, kv_start:kv_end, :].copy_(k)
+        self.v[:, :, kv_start:kv_end, :].copy_(v)
+
+        new_kv_off = max(kv_start, kv_end - self.n_uncached_tok)
+        self.kv_offset.fill_(new_kv_off)
+
+        # --- t_pos upsert (per-layer) ---
+        torch._assert(t_pos.ndim == 2, "t_pos must be 2D")
+        torch._assert(
+            t_pos.size(0) == self.t_pos.size(0),
+            "Batch mismatch in t_pos",
+        )
+
+        S = t_pos.size(1)
+        # per-layer analogue of: start = max(t_pos_offset, kv_offset.min())
+        t_start = max(self.t_pos_offset.item(), self.kv_offset.item())
+        t_end = t_start + S
+        torch._assert(
+            t_end <= self.t_pos.size(1),
+            f"KV cache overflow (t_pos), {t_end}, {self.t_pos.shape}",
+        )
+
+        self.t_pos[:, t_start:t_end].copy_(t_pos)
+
+        new_t_off = max(t_start, t_end - self.n_uncached_tok)
+        self.t_pos_offset.fill_(new_t_off)
+
+        # t_pos_view = self.t_pos[:, :t_end]  # TODO: use for applying attn rules
+
+        return self.k[:, :, :kv_end, :], self.v[:, :, :kv_end, :]
+
+
+class StaticKVCache(nn.Module):
+    def __init__(self, config, max_seq_len, batch_size, dtype, n_uncached_frames: int = 1):
+        super().__init__()
+
+        self.tpf = config.tokens_per_frame
+        self.n_uncached_frames = n_uncached_frames
+        self.n_uncached_tok = self.tpf * n_uncached_frames
+
+        B = batch_size
+        H = getattr(config, "n_kv_heads", config.n_heads)
+        L = max_seq_len * self.tpf
+        Dh = config.d_model // config.n_heads
+        NL = config.n_layers
+
+        self.layers = nn.ModuleList([
+            LayerKVCache(B, H, L, Dh, dtype, self.tpf, self.n_uncached_tok)
+            for _ in range(NL)
+        ])
+
+    def upsert(self, k: Tensor, v: Tensor, t_pos: Tensor, layer: int):
+        return self.layers[layer].upsert(k, v, t_pos)
+####
 
 
 class WorldEngine:

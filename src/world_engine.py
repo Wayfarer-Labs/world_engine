@@ -26,7 +26,7 @@ class CtrlInput:
 
 @dataclass
 class InferenceConfig:
-    quantize: bool = False  # False: bf16, true: w8a8
+    quantize: bool = True  # False: bf16, true: w8a8
     # TODO: use model config scheduler sigmas
     # scheduler_sigmas: Optional[List[float]] = field(default_factory=lambda: [1.0, 0.75, 0.5, 0.25, 0.0])
     # noise_prev: float = 0.0  # always 0 due to self forcing
@@ -154,7 +154,7 @@ class WorldEngine:
             kv_cache.set_frozen(True)
             x = self._denoise_pass(x, state, kv_cache)
         kv_cache.set_frozen(False)
-        kv_cache = self._update_kv_pass(x.clone(), state, kv_cache)
+        kv_cache = self._update_kv_pass(x, state, kv_cache)
         return kv_cache, x.squeeze(1)
 
     def _denoise_pass(self, x, state: Dict[str, Tensor], kv_cache):

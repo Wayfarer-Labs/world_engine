@@ -24,14 +24,6 @@ class CtrlInput:
     mouse: Tuple[float, float] = (0.0, 0.0)  # (x, y) velocity
 
 
-@dataclass
-class InferenceConfig:
-    quant: Optional[str] = None
-    # TODO: use model config scheduler sigmas
-    # scheduler_sigmas: Optional[List[float]] = field(default_factory=lambda: [1.0, 0.75, 0.5, 0.25, 0.0])
-    # noise_prev: float = 0.0  # always 0 due to self forcing
-
-
 class WorldEngine:
     def __init__(
         self,

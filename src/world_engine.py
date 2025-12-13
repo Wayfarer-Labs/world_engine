@@ -55,7 +55,7 @@ class WorldEngine:
         # self.prompt_encoder = PromptEncoder("google/umt5-xl").to(device).eval()  # TODO: dont hardcode
         self.model = WorldModel.from_pretrained(model_uri, cfg=self.model_cfg).to(device=device, dtype=dtype).eval()
         if apply_patches:
-            from world_engine.ae.patch_model import apply_inference_patches
+            from world_engine.patch_model import apply_inference_patches
             apply_inference_patches(self.model)
         self.quantize(self.model, quant)
 
@@ -80,7 +80,6 @@ class WorldEngine:
             Int4WeightOnlyConfig,
             Int8WeightOnlyConfig,
             PerRow,
-            int4_dynamic_activation_int4_weight
         )
         from torchao.prototype.mx_formats import (
             MXDynamicActivationMXWeightConfig,
@@ -106,10 +105,10 @@ class WorldEngine:
             # Int8 weight-only
             "int8": lambda: Int8WeightOnlyConfig(),
             # W4A4 dynamic activations + weights (CUTLASS-based kernel)
-            "w4a4": lambda: int4_dynamic_activation_int4_weight(),
+            # ?, deprecated "w4a4": lambda: int4_dynamic_activation_int4_weight(),
             # Microscaling formats (prototype; MXFP8 + NVFP4/FP4)
             "mxfp8": lambda: MXDynamicActivationMXWeightConfig(),
-            "nvfp4": lambda: NVFP4DynamicActivationNVFP4WeightConfig(),
+            "nvfp4": lambda: NVFP4DynamicActivationNVFP4WeightConfig(use_dynamic_per_tensor_scale=False),
         }[quant]()
 
         recommended_inductor_config_setter()

@@ -8,8 +8,8 @@ version = "0.0.1"
 requires-python = ">=3.9"
 dependencies = [
   "torch==2.10.0.dev20251208+cu128",
-  "torchvision",
-  "torchaudio",
+  "torchvision==0.25.0.dev20251208+cu128",
+  "torchaudio==2.10.0.dev20251208+cu128",
   "einops",
   "rotary-embedding-torch>=0.8.8",
   "tensordict==0.10.0",

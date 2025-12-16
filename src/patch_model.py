@@ -126,7 +126,7 @@ class MergedQKVAttn(Attn):
         q, k = self.rope(q, pos_ids), self.rope(k, pos_ids)
 
         if kv_cache is not None:
-            k, v, bm = kv_cache.upsert(k, v, pos_ids["t_pos"], self.layer_idx)
+            k, v, bm = kv_cache.upsert(k, v, pos_ids, self.layer_idx)
 
         y = flex_attention(q, k, v, block_mask=bm, enable_gqa=self.enable_gqa)
 

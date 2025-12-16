@@ -29,13 +29,18 @@ Out-of-scope pieces can go in `examples/`, which is **not** part of the `world_e
 
 #### Setup
 ```
+# Recommended
+python3 -m venv .env
+source .env/bin/activate
+```
+
+```
 # Install
 pip install \
   --index-url https://download.pytorch.org/whl/test/cu128 \
+  --extra-index-url https://download.pytorch.org/whl/nightly/cu128 \
   --extra-index-url https://pypi.org/simple \
   "world_engine @ git+https://$GITHUB_USER:$GITHUB_TOKEN@github.com/Wayfarer-Labs/world_engine.git"
-
-pip install --no-deps --only-binary=:all: xformers==0.0.33.post2
 ```
 
 ```

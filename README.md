@@ -30,9 +30,10 @@ Out-of-scope pieces can go in `examples/`, which is **not** part of the `world_e
 #### Setup
 ```
 # Install
-pip install --pre \
+pip install \
   --index-url https://download.pytorch.org/whl/test/cu128 \
   --extra-index-url https://pypi.org/simple \
+  --only-binary xformers \
   "world_engine @ git+https://$GITHUB_USER:$GITHUB_TOKEN@github.com/Wayfarer-Labs/world_engine.git"
 ```
 

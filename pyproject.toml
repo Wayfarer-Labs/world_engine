@@ -18,7 +18,7 @@ dependencies = [
   "transformers==4.57",
   "ftfy",
   "diffusers",
-  "xformers",
+  "xformers==0.0.33.post2",
   "huggingface-hub==0.36.0",
   "omegaconf",
 ]
